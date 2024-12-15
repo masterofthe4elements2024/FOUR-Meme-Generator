@@ -1,13 +1,15 @@
 import streamlit as st
 from PIL import Image
 import random
+from pathlib import Path
 
 # Load pre-set FOOR templates
 def load_templates():
+    base_path = Path(__file__).parent
     return [
-        {"name": "Classic FOOR", "image": "foor_classic.png"},
-        {"name": "Banana Attack", "image": "foor_banana.png"},
-        {"name": "Zen Master", "image": "foor_zen.png"},
+        {"name": "Classic FOOR", "image": base_path / "foor_classic.png"},
+        {"name": "Banana Attack", "image": base_path / "foor_banana.png"},
+        {"name": "Zen Master", "image": base_path / "foor_zen.png"},
     ]
 
 def generate_caption(prompt):
