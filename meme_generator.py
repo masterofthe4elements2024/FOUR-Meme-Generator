@@ -1,6 +1,5 @@
 import streamlit as st
-from PIL import Image
-import random
+from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
 
 # Load pre-set FOOR templates
@@ -12,13 +11,33 @@ def load_templates():
         {"name": "Zen Master", "image": base_path / "foor_zen.png"},
     ]
 
-def generate_caption(prompt):
-    captions = [
-        f"When life gives you {prompt}, FOOR throws bananas!",
-        f"FOOR says: '{prompt}' is no match for duct tape!",
-        f"Chaos, {prompt}, and bananas: FOOR approves!",
-    ]
-    return random.choice(captions)
+# Add text to image
+def add_text_to_image(image_path, text):
+    # Load the image
+    image = Image.open(image_path)
+    draw = ImageDraw.Draw(image)
+
+    # Define font size and position
+    try:
+        font = ImageFont.truetype("arial.ttf", size=30)
+    except:
+        font = ImageFont.load_default()
+
+    text_width, text_height = draw.textsize(text, font=font)
+    image_width, image_height = image.size
+
+    # Position text at the center bottom of the image
+    text_x = (image_width - text_width) / 2
+    text_y = image_height - text_height - 20
+
+    # Add text with a black outline for readability
+    draw.text((text_x - 1, text_y - 1), text, font=font, fill="black")
+    draw.text((text_x + 1, text_y - 1), text, font=font, fill="black")
+    draw.text((text_x - 1, text_y + 1), text, font=font, fill="black")
+    draw.text((text_x + 1, text_y + 1), text, font=font, fill="black")
+    draw.text((text_x, text_y), text, font=font, fill="white")
+
+    return image
 
 # Streamlit app
 st.title("FOOR Meme Generator")
@@ -35,7 +54,6 @@ selected_template = st.sidebar.radio(
 selected_image = next(
     template["image"] for template in templates if template["name"] == selected_template
 )
-image = Image.open(selected_image)
 
 # Prompt input
 prompt = st.text_input(
@@ -45,8 +63,8 @@ prompt = st.text_input(
 # Generate and display meme
 if st.button("Generate Meme"):
     if prompt:
-        caption = generate_caption(prompt)
-        st.image(image, caption=caption, use_column_width=True)
+        meme_image = add_text_to_image(selected_image, prompt)
+        st.image(meme_image, caption="Your Meme", use_column_width=True)
         st.success("Meme generated! Right-click to save or share.")
     else:
         st.warning("Please enter a prompt to generate a caption.")
